@@ -1,78 +1,77 @@
 
-import { useState } from 'react';
+import { TrendingUp, TrendingDown, AlertTriangle, MessageCircle } from 'lucide-react';
 
 interface AlienTraderProps {
   species: 'zurvian' | 'krelthan' | 'xyphorian';
   name: string;
   trait: string;
-  relationship: 'hostile' | 'neutral' | 'friendly';
+  relationship: 'friendly' | 'neutral' | 'hostile';
   avatar: string;
+  onNegotiate?: () => void;
 }
 
-export default function AlienTrader({ species, name, trait, relationship, avatar }: AlienTraderProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const speciesColors = {
-    zurvian: 'from-amber-500/20 to-amber-800/10 border-amber-500/30',
-    krelthan: 'from-red-500/20 to-red-800/10 border-red-500/30',
-    xyphorian: 'from-blue-500/20 to-blue-800/10 border-blue-500/30',
+export default function AlienTrader({ species, name, trait, relationship, avatar, onNegotiate }: AlienTraderProps) {
+  // Relationship styles
+  const relationshipStyles = {
+    friendly: {
+      icon: <TrendingUp className="w-3 h-3 mr-1" />,
+      color: 'text-green-400 bg-green-400/10'
+    },
+    neutral: {
+      icon: null,
+      color: 'text-blue-400 bg-blue-400/10'
+    },
+    hostile: {
+      icon: <TrendingDown className="w-3 h-3 mr-1" />,
+      color: 'text-red-400 bg-red-400/10'
+    }
   };
 
-  const relationshipClasses = {
-    hostile: 'bg-red-500/20 text-red-400',
-    neutral: 'bg-yellow-500/20 text-yellow-400',
-    friendly: 'bg-green-500/20 text-green-400',
+  // Species colors
+  const speciesColors = {
+    zurvian: 'border-purple-500/30',
+    krelthan: 'border-amber-500/30',
+    xyphorian: 'border-blue-500/30'
   };
 
   return (
-    <div className={`cosmic-card cursor-pointer overflow-hidden transition-all duration-300`} 
-         onClick={() => setIsExpanded(!isExpanded)}>
-      <div className={`absolute inset-0 bg-gradient-to-br ${speciesColors[species]} opacity-50`} />
-      
-      <div className="relative p-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-cosmic-navy/70 shadow-lg">
-            <img 
-              src={avatar} 
-              alt={name} 
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-medium text-white">{name}</h3>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-cosmic-navy/50">
-                {species.charAt(0).toUpperCase() + species.slice(1)}
-              </span>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${relationshipClasses[relationship]}`}>
-                {relationship.charAt(0).toUpperCase() + relationship.slice(1)}
-              </span>
-            </div>
-          </div>
+    <div className="cosmic-card p-4">
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${speciesColors[species]}`}>
+          <img src={avatar} alt={name} className="w-full h-full object-cover" />
         </div>
         
-        {isExpanded && (
-          <div className="mt-4 pt-4 border-t border-cosmic-navy/50 animate-fade-in">
-            <div className="mb-3">
-              <span className="text-cosmic-silver text-sm">Trait:</span>
-              <p className="text-sm mt-1">{trait}</p>
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-white font-medium">{name}</h3>
+              <div className="text-xs text-cosmic-silver mt-0.5">{species.charAt(0).toUpperCase() + species.slice(1)}</div>
             </div>
             
-            <div className="mb-3">
-              <span className="text-cosmic-silver text-sm">Negotiation Style:</span>
-              <p className="text-sm mt-1">
-                {species === 'zurvian' && 'Prefers bulk trades and always asks for discounts.'}
-                {species === 'krelthan' && 'Cunning and unpredictable. Watch for hidden fees.'}
-                {species === 'xyphorian' && 'Logical and data-driven. Values precise information.'}
-              </p>
+            <div className={`text-xs px-2 py-1 rounded-full flex items-center ${relationshipStyles[relationship].color}`}>
+              {relationshipStyles[relationship].icon}
+              {relationship.charAt(0).toUpperCase() + relationship.slice(1)}
             </div>
-            
-            <button className="cosmic-button-secondary w-full mt-2 py-2 text-sm">Initiate Contact</button>
           </div>
-        )}
+          
+          <div className="text-sm mt-2 text-cosmic-silver">{trait}</div>
+          
+          {relationship === 'hostile' && (
+            <div className="flex items-center text-xs text-amber-400 mt-1">
+              <AlertTriangle className="w-3 h-3 mr-1" />
+              Unpredictable deals
+            </div>
+          )}
+        </div>
       </div>
+      
+      <button 
+        onClick={onNegotiate}
+        className="mt-3 w-full cosmic-button-secondary py-2 text-sm flex items-center justify-center gap-1"
+      >
+        <MessageCircle className="w-4 h-4" />
+        Negotiate
+      </button>
     </div>
   );
 }

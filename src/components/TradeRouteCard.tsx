@@ -1,99 +1,85 @@
 
-import { useState } from 'react';
-import { Ship, ArrowRight } from 'lucide-react';
+import { AlertTriangle, ArrowRight, TrendingUp } from 'lucide-react';
 import Planet from './Planet';
 
-interface TradeRouteProps {
-  route: {
-    id: string;
-    source: {
-      name: string;
-      type: 'rocky' | 'gas' | 'ice' | 'lava' | 'ocean';
-    };
-    destination: {
-      name: string;
-      type: 'rocky' | 'gas' | 'ice' | 'lava' | 'ocean';
-    };
-    resource: string;
-    profit: number;
-    risk: 'low' | 'medium' | 'high';
-    duration: number;
-  };
+interface RouteProps {
+  id: string;
+  source: { name: string; type: 'rocky' | 'gas' | 'ice' | 'lava' | 'ocean' };
+  destination: { name: string; type: 'rocky' | 'gas' | 'ice' | 'lava' | 'ocean' };
+  resource: string;
+  profit: number;
+  risk: 'low' | 'medium' | 'high';
+  duration: number;
+  onActivate?: () => void;
 }
 
-export default function TradeRouteCard({ route }: TradeRouteProps) {
-  const [expanded, setExpanded] = useState(false);
-
-  const riskClasses = {
-    low: 'bg-green-500/20 text-green-300',
-    medium: 'bg-yellow-500/20 text-yellow-300',
-    high: 'bg-red-500/20 text-red-300'
+export default function TradeRouteCard({ route, onActivate }: { route: RouteProps, onActivate?: () => void }) {
+  const { source, destination, resource, profit, risk, duration } = route;
+  
+  // Risk colors for UI
+  const riskColor = {
+    low: 'text-green-400',
+    medium: 'text-amber-400',
+    high: 'text-red-400'
   };
-
+  
   return (
-    <div 
-      className="cosmic-card overflow-hidden cursor-pointer"
-      onClick={() => setExpanded(!expanded)}
-    >
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Planet 
-              name=""
-              size="sm"
-              type={route.source.type}
-            />
-            <ArrowRight className="w-5 h-5 text-cosmic-silver" />
-            <Planet 
-              name=""
-              size="sm"
-              type={route.destination.type}
-            />
-          </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-medium ${riskClasses[route.risk]}`}>
-            {route.risk.toUpperCase()} RISK
-          </div>
+    <div className="cosmic-card p-5">
+      {/* Route header */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2 text-cosmic-silver text-sm">
+          <div className="w-2 h-2 rounded-full bg-cosmic-purple"></div>
+          <span>Trade Route</span>
         </div>
-
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-cosmic-silver">Route:</span>
-            <span className="font-medium">{route.source.name} → {route.destination.name}</span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-cosmic-silver">Resource:</span>
-            <span className="font-medium">{route.resource}</span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-cosmic-silver">Est. Profit:</span>
-            <span className="font-medium text-cosmic-teal">+{route.profit.toLocaleString()} GC</span>
-          </div>
+        <div className={`flex items-center text-xs ${riskColor[risk]}`}>
+          {risk !== 'low' && <AlertTriangle className="w-3 h-3 mr-1" />}
+          {risk.charAt(0).toUpperCase() + risk.slice(1)} Risk
         </div>
-
-        {expanded && (
-          <div className="mt-4 pt-4 border-t border-cosmic-navy/50 space-y-3 animate-fade-in">
-            <div className="flex justify-between items-center">
-              <span className="text-cosmic-silver">Travel time:</span>
-              <span className="font-medium">{route.duration} days</span>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <span className="text-cosmic-silver">Status:</span>
-              <span className="font-medium text-green-400">Available</span>
-            </div>
-
-            <div className="flex justify-between gap-2 mt-4">
-              <button className="cosmic-button-secondary py-2 text-sm flex-1">Details</button>
-              <button className="cosmic-button py-2 text-sm flex-1 flex items-center justify-center gap-1">
-                <Ship className="w-4 h-4" />
-                <span>Deploy</span>
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+      
+      {/* Planets info */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col items-center">
+          <Planet name="" size="sm" type={source.type} />
+          <span className="mt-2 text-sm text-white">{source.name}</span>
+        </div>
+        
+        <div className="flex flex-col items-center px-2">
+          <ArrowRight className="w-5 h-5 text-cosmic-silver mb-2" />
+          <span className="text-xs text-cosmic-silver">{duration} days</span>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <Planet name="" size="sm" type={destination.type} />
+          <span className="mt-2 text-sm text-white">{destination.name}</span>
+        </div>
+      </div>
+      
+      {/* Resource and profit info */}
+      <div className="bg-cosmic-navy/30 rounded-lg p-3 mb-4">
+        <div className="text-sm text-cosmic-silver mb-1">Trading Resource</div>
+        <div className="text-white font-medium">{resource}</div>
+      </div>
+      
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <div className="text-sm text-cosmic-silver">Estimated Profit</div>
+          <div className="text-xl font-bold text-white">{profit.toLocaleString()} GC</div>
+        </div>
+        
+        <div className="flex items-center text-green-400 text-sm">
+          <TrendingUp className="w-4 h-4 mr-1" />
+          {Math.floor(profit / 1000)}k / day
+        </div>
+      </div>
+      
+      {/* Action button */}
+      <button 
+        onClick={onActivate}
+        className="w-full cosmic-button py-2 text-sm"
+      >
+        Activate Route
+      </button>
     </div>
   );
 }
